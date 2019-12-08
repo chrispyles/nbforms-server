@@ -10,3 +10,8 @@ require './app'
 #   t.cucumber_opts = "features --format html > features.html"
 # end
 
+desc 'Clear the database'
+task :clear do
+  Question.destroy_all
+end
+
