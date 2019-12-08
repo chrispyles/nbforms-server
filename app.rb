@@ -6,6 +6,7 @@
 require 'sinatra'
 require 'sinatra/flash'
 require 'sinatra/activerecord'
+require './lib/csv_generator.rb'
 
 # load the models
 current_dir = Dir.pwd
@@ -39,6 +40,8 @@ class App < Sinatra::Base
 		@user_hashes = params[:user_hashes] == "1"
 		@rows = Question.to_2d_array @questions, @user_hashes
 		content_type 'text/csv'
+		# puts array_to_csv_string @rows
+		# array_to_csv_string @rows
 		erb :csv
 	end
 
