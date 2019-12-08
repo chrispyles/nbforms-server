@@ -14,6 +14,14 @@ test:
   username: root
   password: root
 
+cucumber:
+  adapter: postgresql
+  encoding: unicode
+  database: nbforms_app_test
+  pool: 2
+  username: root
+  password: root
+
 production:
   adapter: postgresql
   encoding: unicode
