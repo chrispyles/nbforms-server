@@ -1,0 +1,151 @@
+/*
+	CSS Styles for OkPy Test Generator
+*/
+
+body {
+	display: flex;
+	flex-direction: column;
+}
+
+html, body {
+	height: 100%;
+}
+
+h1 {
+	padding-top: 30px;
+}
+
+h3, h4 {
+	padding-top: 20px;
+}
+
+p {
+	padding-top: 10px;
+}
+
+.btn-light {
+	background: #2badad;
+	border-color: #2badad;
+	color: white;
+}
+
+.btn-light:hover {
+	background: black;
+	border-color: black;
+	color: white;
+}
+
+/* Header */
+
+img#ok-logo {
+	height: 4.5rem;
+	display: inline-block;
+}
+
+header table#header {
+	width: 100%;
+}
+
+table#header div svg {
+	vertical-align: text-top;
+}
+
+header td#view-on-gh {
+	text-align: right;
+}
+
+svg {
+	fill: white;
+	margin-bottom: 4px;
+}
+
+/* Footer */
+
+footer {
+	/*position: sticky;*/
+	/*bottom: 0;*/
+	width: 100%;
+	background: rgb(241, 244, 251);
+	flex-shrink: 0;
+}
+
+/* include so that footer sticks to the bottom */
+div.container#body {
+	flex: 1 0 auto;
+}
+
+/*footer div#copyright {
+	padding: 20px 0;
+	text-align: center;
+}*/
+
+footer div a:link, footer div a:hover, footer div a:visited {
+	color: black;
+	text-decoration: underline;
+}
+
+
+/* Cases Form */
+
+input.form-control {
+	margin-top: 10px;
+	display: inline-block;
+}
+
+/*div.form-group.row input.form-control {
+	margin-right: 20px;
+	width:;
+}*/
+
+div.form-group.row button, button.return-button {
+	width: 100%;
+}
+
+input.code-input, textarea.code-input, 
+input[name="testname"], input[name="points"] {
+	font-family: monospace;
+	font-size: 15px;
+}
+
+div.cases-checkbox {
+	text-align: center;
+	padding-top: 6px;
+}
+
+div.form-group.row div.form-control {
+	margin-top: 10px;
+	border: none;
+}
+
+div.form-group.row div.form-control input, 
+div.form-group.row div.form-control label {
+	padding-bottom: 2px;
+}
+
+/* Set height of code and output textareas */
+div.form-group textarea {
+	height: 100px;
+}
+
+/* Add spacing between code and output textareas */
+div.form-group textarea:last-of-type {
+	margin-top: 10px;
+}
+
+
+/* Return Page */
+
+button.return-button {
+	margin-top: 20px;
+}
+
+textarea.output {
+	display: block;
+	height: 400px;
+	background: #eee;
+	color: #444;
+	overflow: scroll;
+	font-family: monospace;
+	font-size: 15px;
+	width: 100%;
+}
