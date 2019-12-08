@@ -4,6 +4,7 @@ class CreateQuestions < ActiveRecord::Migration[6.0]
 	  	t.string :identifier
 	  	t.string :response
 	  	t.string :user_hash
+	  	t.string :notebook
 	  end
 	end
 end

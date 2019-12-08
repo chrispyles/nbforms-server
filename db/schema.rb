@@ -19,6 +19,7 @@ ActiveRecord::Schema.define(version: 2019_12_08_173028) do
     t.string "identifier"
     t.string "response"
     t.string "user_hash"
+    t.string "notebook"
   end
 
 end

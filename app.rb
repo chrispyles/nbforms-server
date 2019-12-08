@@ -6,7 +6,7 @@
 require 'sinatra'
 require 'sinatra/flash'
 require 'sinatra/activerecord'
-require './lib/csv_generator.rb'
+require 'csv'
 
 # load the models
 current_dir = Dir.pwd
@@ -29,7 +29,7 @@ class App < Sinatra::Base
 
 	# route to submit form
 	post "/submit" do
-		@question = Question.get_or_create_user_submission params[:user_hash], params[:identifier]
+		@question = Question.get_or_create_user_submission params[:user_hash], params[:notebook], params[:identifier]
 		@question.response = params[:response]
 		@question.save!
 	end
@@ -38,10 +38,8 @@ class App < Sinatra::Base
 	get "/data" do
 		@questions = params[:questions].split(',')
 		@user_hashes = params[:user_hashes] == "1"
-		@rows = Question.to_2d_array @questions, @user_hashes
+		@rows = Question.to_2d_array params[:notebook], @questions, @user_hashes
 		content_type 'text/csv'
-		# puts array_to_csv_string @rows
-		# array_to_csv_string @rows
 		erb :csv
 	end
 

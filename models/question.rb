@@ -1,9 +1,9 @@
 class Question < ActiveRecord::Base
-	def self.get_or_create_user_submission user_hash, identifier
-		Question.where(user_hash: user_hash).where(identifier: identifier).first_or_initialize
+	def self.get_or_create_user_submission user_hash, notebook, identifier
+		Question.where(user_hash: user_hash).where(notebook: notebook).where(identifier: identifier).first_or_initialize
 	end
 
-	def self.to_2d_array questions, user_hashes
+	def self.to_2d_array notebook, questions, user_hashes
 		rows = {}
 		if user_hashes
 			rows[0] = ['user'] + questions
@@ -12,7 +12,7 @@ class Question < ActiveRecord::Base
 		end
 
 		idx = 1
-		relation = Question.where(identifier: questions)
+		relation = Question.where(notebook: notebook, identifier: questions)
 		relation.pluck(:user_hash).uniq.each do |user|
 			row = []
 			if user_hashes
