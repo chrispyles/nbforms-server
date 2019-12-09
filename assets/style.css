@@ -1,5 +1,5 @@
 /*
-	CSS Styles for OkPy Test Generator
+	CSS Styles for nbforms Config Generator
 */
 
 body {
@@ -90,6 +90,19 @@ footer div a:link, footer div a:hover, footer div a:visited {
 input.form-control {
 	margin-top: 10px;
 	display: inline-block;
+	margin-bottom: 10px;
+}
+
+div.id-type-div {
+	width: 100%;
+}
+
+div#question-container table {
+	/*display: block;*/
+}
+
+div#question-container table, div#question-container table tr {
+	width: 100%;
 }
 
 /*div.form-group.row input.form-control {
@@ -105,6 +118,28 @@ input.code-input, textarea.code-input,
 input[name="testname"], input[name="points"] {
 	font-family: monospace;
 	font-size: 15px;
+}
+
+textarea.question-input {
+	margin-bottom: 10px;
+}
+
+input.option {
+	margin-bottom: 10px;
+	height: 38px;
+}
+
+button.add-option, button.delete-question {
+	margin-bottom: 10px;
+	width: 100%;
+}
+
+button.delete-option {
+	margin-top: 10px;
+}
+
+div.question-buttons {
+	margin: 0;
 }
 
 div.cases-checkbox {

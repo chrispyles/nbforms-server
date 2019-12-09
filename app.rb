@@ -7,6 +7,7 @@ require 'sinatra'
 require 'sinatra/flash'
 require 'sinatra/activerecord'
 require 'csv'
+require 'json'
 
 # load the models
 current_dir = Dir.pwd
@@ -33,6 +34,12 @@ class App < Sinatra::Base
 	get "/assets/style.css" do
 		content_type "text/css"
 		File.read("./assets/style.css")
+	end
+
+	# route to access custom JavaScript
+	get "/assets/core.js" do
+		content_type "text/javascript"
+		File.read("./assets/core.js")
 	end
 
 	# route to authenticate
@@ -68,6 +75,14 @@ class App < Sinatra::Base
 		@rows = Question.to_2d_array params[:notebook], @questions, @user_hashes, false
 		content_type 'text/csv'
 		erb :csv
+	end
+
+	# route to generate a config file
+	get "/config" do
+		config_hash = params.slice(:server_url, :notebook, :questions)
+		config_hash[:questions] = config_hash[:questions].values
+		@json = JSON.pretty_generate config_hash
+		erb :config_return_page
 	end
 
 end
