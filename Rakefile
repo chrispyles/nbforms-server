@@ -15,3 +15,17 @@ task :clear do
   Question.destroy_all
 end
 
+namespace :clear do
+
+	desc 'Clear the database'
+	task :all do
+		Question.destroy_all
+	end
+
+	desc "Clear a user's responses"
+	task :user, [:username] do |t, args|
+		user = User.where(username: args.username).first
+		user.questions.destroy_all
+	end
+
+end

@@ -11,6 +11,7 @@ gem 'bcrypt'
 
 group :development do
 	gem 'rerun', '~> 0.13.0' 
+	gem 'byebug'
 end
 
 group :test do
