@@ -5,7 +5,7 @@ class Question < ActiveRecord::Base
 		Question.where(user_id: user.id).where(notebook: notebook).where(identifier: identifier).first_or_initialize
 	end
 
-	def self.to_2d_array notebook, questions, user_hashes
+	def self.to_2d_array notebook, questions, user_hashes, usernames
 		rows = {}
 		if user_hashes
 			rows[0] = ['user'] + questions
@@ -19,6 +19,8 @@ class Question < ActiveRecord::Base
 			row = []
 			if user_hashes
 				row << User.find(user).hash_username
+			elsif usernames
+				row << User.find(user).username
 			end
 			questions.each do |question|
 				begin
@@ -34,5 +36,10 @@ class Question < ActiveRecord::Base
 			end
 		end
 		rows
+	end
+
+	def self.get_all_notebook_questions notebook, usernames=false
+		questions = Question.where(notebook: notebook).pluck(:identifier).uniq
+		Question.to_2d_array notebook, questions, false, usernames
 	end
 end

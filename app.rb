@@ -57,7 +57,7 @@ class App < Sinatra::Base
 	get "/data" do
 		@questions = params[:questions].split(',')
 		@user_hashes = params[:user_hashes] == "1"
-		@rows = Question.to_2d_array params[:notebook], @questions, @user_hashes
+		@rows = Question.to_2d_array params[:notebook], @questions, @user_hashes, false
 		content_type 'text/csv'
 		erb :csv
 	end

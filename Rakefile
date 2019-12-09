@@ -29,3 +29,13 @@ namespace :clear do
 	end
 
 end
+
+namespace :reports do
+
+	desc 'Generates a CSV of all responses to notebook'
+	task :notebook, [:id] do |t, args|
+		questions = Question.get_all_notebook_questions args.notebook, true
+		puts questions
+	end
+
+end
