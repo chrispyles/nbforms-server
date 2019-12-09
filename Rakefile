@@ -2,7 +2,6 @@ require 'rubygems'
 require 'sinatra/activerecord'
 require 'sinatra/activerecord/rake'
 require './app'
-require 'byebug'
 
 namespace :clear do
 
