@@ -1,6 +1,8 @@
 class Question < ActiveRecord::Base
-	def self.get_or_create_user_submission user_hash, notebook, identifier
-		Question.where(user_hash: user_hash).where(notebook: notebook).where(identifier: identifier).first_or_initialize
+	belongs_to :user
+
+	def self.get_or_create_user_submission user, notebook, identifier
+		Question.where(user_id: user.id).where(notebook: notebook).where(identifier: identifier).first_or_initialize
 	end
 
 	def self.to_2d_array notebook, questions, user_hashes
@@ -13,14 +15,14 @@ class Question < ActiveRecord::Base
 
 		idx = 1
 		relation = Question.where(notebook: notebook, identifier: questions)
-		relation.pluck(:user_hash).uniq.each do |user|
+		relation.pluck(:user_id).uniq.each do |user|
 			row = []
 			if user_hashes
-				row << user
+				row << User.find(user).hash_username
 			end
 			questions.each do |question|
 				begin
-					response = relation.where(user_hash: user, identifier: question).first.response
+					response = relation.where(user_id: user, identifier: question).first.response
 				rescue NoMethodError
 					response = nil
 				end

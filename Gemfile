@@ -7,6 +7,7 @@ gem 'pg'
 gem 'activerecord'
 gem 'sinatra-activerecord'
 gem 'rake'
+gem 'bcrypt'
 
 group :development do
 	gem 'rerun', '~> 0.13.0' 

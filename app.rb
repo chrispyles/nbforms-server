@@ -27,11 +27,30 @@ class App < Sinatra::Base
 		File.read("./assets/style.css")
 	end
 
+	# route to authenticate
+	post "/auth" do
+		@user = User.where(username: params[:username]).first_or_initialize
+		if @user.password_hash.nil?
+			@user.password_hash = User.hash_password params[:password]
+			@user.save
+		end
+		if @user.test_password params[:password]
+			@user.api_key = User.generate_key
+			@user.save
+			@user.api_key
+		else
+			"INVALID USERNAME"
+		end
+	end
+
 	# route to submit form
 	post "/submit" do
-		@question = Question.get_or_create_user_submission params[:user_hash], params[:notebook], params[:identifier]
-		@question.response = params[:response]
-		@question.save!
+		@user = User.where(username: params[:username]).first
+		if @user.api_key == params[:api_key]
+			@question = Question.get_or_create_user_submission @user, params[:notebook], params[:identifier]
+			@question.response = params[:response]
+			@question.save!
+		end
 	end
 
 	# route to extract data from questions
