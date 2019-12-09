@@ -34,9 +34,16 @@ end
 namespace :reports do
 
 	desc 'Generates a CSV of all responses to notebook'
-	task :notebook, [:id] do |t, args|
+	task :notebook, [:id, :out_path] do |t, args|
 		questions = Question.get_all_notebook_questions args.id.to_s, true
-		puts rows_hash_to_csv_string questions
+		csv_string = rows_hash_to_csv_string questions
+		if args.out_path
+			File.open(args.out_path, 'w+') do |f|
+				f.write csv_string
+			end
+		else
+			puts csv_string
+		end
 	end
 
 end
