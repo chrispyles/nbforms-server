@@ -7,8 +7,8 @@ class Question < ActiveRecord::Base
 
 	def self.to_2d_array notebook, questions, user_hashes, usernames
 		rows = {}
-		if user_hashes
-			rows[0] = ['user'] + questions
+		if user_hashes || usernames
+			rows[0] = ['user'] + questions.sort
 		else
 			rows[0] = questions
 		end
@@ -22,7 +22,7 @@ class Question < ActiveRecord::Base
 			elsif usernames
 				row << User.find(user).username
 			end
-			questions.each do |question|
+			questions.sort.each do |question|
 				begin
 					response = relation.where(user_id: user, identifier: question).first.response
 				rescue NoMethodError

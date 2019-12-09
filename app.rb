@@ -12,6 +12,14 @@ require 'csv'
 current_dir = Dir.pwd
 Dir["#{current_dir}/models/*.rb"].each { |file| require file }
 
+def rows_hash_to_csv_string rows
+	csv_string = ""
+	rows.each do |idx, row|
+		csv_string += row.to_csv
+	end
+	csv_string
+end
+
 # app class for Sinatra
 class App < Sinatra::Base
 
@@ -47,7 +55,7 @@ class App < Sinatra::Base
 	post "/submit" do
 		@user = User.where(username: params[:username]).first
 		if @user.api_key == params[:api_key]
-			@question = Question.get_or_create_user_submission @user, params[:notebook], params[:identifier]
+			@question = Question.get_or_create_user_submission @user, params[:notebook], params[:identifier].to_s
 			@question.response = params[:response]
 			@question.save!
 		end

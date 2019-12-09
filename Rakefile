@@ -4,6 +4,7 @@ require 'rubygems'
 require 'sinatra/activerecord'
 require 'sinatra/activerecord/rake'
 require './app'
+require 'byebug'
 
 # Cucumber::Rake::Task.new(:features) do |t|
 #   # t.cucumber_opts = "features --format pretty"
@@ -34,8 +35,8 @@ namespace :reports do
 
 	desc 'Generates a CSV of all responses to notebook'
 	task :notebook, [:id] do |t, args|
-		questions = Question.get_all_notebook_questions args.notebook, true
-		puts questions
+		questions = Question.get_all_notebook_questions args.id.to_s, true
+		puts rows_hash_to_csv_string questions
 	end
 
 end
