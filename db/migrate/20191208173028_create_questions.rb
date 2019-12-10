@@ -6,6 +6,7 @@ class CreateQuestions < ActiveRecord::Migration[6.0]
 	  	t.string :response
 	  	t.string :user_hash
 	  	t.string :notebook
+	  	t.datetime :timestamp
 	  end
 	end
 end

@@ -21,6 +21,7 @@ ActiveRecord::Schema.define(version: 2019_12_09_041616) do
     t.string "response"
     t.string "user_hash"
     t.string "notebook"
+    t.datetime "timestamp"
     t.index ["user_id"], name: "index_questions_on_user_id"
   end
 
