@@ -91,7 +91,7 @@ class App < Sinatra::Base
 		@user = User.where(api_key: params[:api_key]).first
 		@question = Question.get_or_create_user_submission @user, params[:notebook], params[:identifier].to_s
 		@question.response = params[:response]
-		@question.timestamp = Time.now
+		# @question.timestamp = Time.now
 		@question.save!
 	end
 
