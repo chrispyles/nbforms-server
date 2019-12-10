@@ -83,16 +83,15 @@ class App < Sinatra::Base
 	get '/auth/callback' do
 	  auth_process_code params[:code]
 	  @user.set_api_key
+	  erb :api_key
 	end
 
 	# route to submit form
 	post "/submit" do
 		@user = User.where(api_key: params[:api_key]).first
-		if @user.api_key == params[:api_key]
-			@question = Question.get_or_create_user_submission @user, params[:notebook], params[:identifier].to_s
-			@question.response = params[:response]
-			@question.save!
-		end
+		@question = Question.get_or_create_user_submission @user, params[:notebook], params[:identifier].to_s
+		@question.response = params[:response]
+		@question.save!
 	end
 
 	# route to extract data from questions
