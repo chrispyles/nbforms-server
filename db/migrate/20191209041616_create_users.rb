@@ -4,6 +4,8 @@ class CreateUsers < ActiveRecord::Migration[6.0]
   		t.string :username
   		t.string :password_hash
   		t.string :api_key
+  		t.string :name
+  		t.string :email
   	end
   end
 end

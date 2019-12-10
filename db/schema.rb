@@ -28,6 +28,8 @@ ActiveRecord::Schema.define(version: 2019_12_09_041616) do
     t.string "username"
     t.string "password_hash"
     t.string "api_key"
+    t.string "name"
+    t.string "email"
   end
 
 end

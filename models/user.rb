@@ -1,5 +1,4 @@
 require 'bcrypt'
-require 'securerandom'
 require 'digest'
 
 class User < ActiveRecord::Base
@@ -22,14 +21,10 @@ class User < ActiveRecord::Base
 	  BCrypt::Password.new(password_hash) == password
 	end
 
-	def self.generate_key
-		api_key = SecureRandom.urlsafe_base64
-		iter = 0
-		while User.pluck(:api_key).uniq.include? api_key && iter < 100
-			api_key = SecureRandom.urlsafe_base64
-			iter += 1
-		end
-		api_key
+	def set_api_key
+		self.api_key = Digest::SHA256.hexdigest "#{email || username}#{Time.now}"
+		self.save!
+		self.api_key
 	end
 
 end

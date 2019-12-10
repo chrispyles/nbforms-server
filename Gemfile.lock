@@ -14,8 +14,11 @@ GEM
       zeitwerk (~> 2.2)
     addressable (2.7.0)
       public_suffix (>= 2.0.2, < 5.0)
-    backports (3.15.0)
     bcrypt (3.1.13)
+    better_errors (2.5.1)
+      coderay (>= 1.0.0)
+      erubi (>= 1.0.0)
+      rack (>= 0.9.0)
     builder (3.2.3)
     byebug (11.0.1)
     capybara (3.29.0)
@@ -35,28 +38,22 @@ GEM
       url
     coderay (1.1.2)
     concurrent-ruby (1.1.5)
-    cucumber (3.1.2)
+    config_env (0.1.2)
+    cucumber (1.3.2)
       builder (>= 2.1.2)
-      cucumber-core (~> 3.2.0)
-      cucumber-expressions (~> 6.0.1)
-      cucumber-wire (~> 0.0.1)
-      diff-lcs (~> 1.3)
-      gherkin (~> 5.1.0)
-      multi_json (>= 1.7.5, < 2.0)
-      multi_test (>= 0.1.2)
-    cucumber-core (3.2.1)
-      backports (>= 3.8.0)
-      cucumber-tag_expressions (~> 1.1.0)
-      gherkin (~> 5.0)
-    cucumber-expressions (6.0.1)
-    cucumber-tag_expressions (1.1.1)
-    cucumber-wire (0.0.1)
+      diff-lcs (>= 1.1.3)
+      gherkin (~> 2.12.0)
+      multi_json (~> 1.3)
     diff-lcs (1.3)
     docile (1.3.2)
-    ffi (1.11.1)
+    erubi (1.9.0)
+    faraday (0.17.1)
+      multipart-post (>= 1.2, < 3)
+    ffi (1.11.3)
     foreman (0.86.0)
     formatador (0.2.5)
-    gherkin (5.1.0)
+    gherkin (2.12.2)
+      multi_json (~> 1.3)
     guard (2.16.1)
       formatador (>= 0.2.4)
       listen (>= 2.7, < 4.0)
@@ -74,9 +71,10 @@ GEM
     i18n (1.7.0)
       concurrent-ruby (~> 1.0)
     json (2.2.0)
+    jwt (2.2.1)
     launchy (2.4.3)
       addressable (~> 2.3)
-    listen (3.2.0)
+    listen (3.2.1)
       rb-fsevent (~> 0.10, >= 0.10.3)
       rb-inotify (~> 0.9, >= 0.9.10)
     lumberjack (1.0.13)
@@ -84,8 +82,9 @@ GEM
     mini_mime (1.0.2)
     mini_portile2 (2.4.0)
     minitest (5.13.0)
-    multi_json (1.14.1)
-    multi_test (0.1.2)
+    multi_json (1.5.1)
+    multi_xml (0.6.0)
+    multipart-post (2.1.1)
     mustermann (1.0.3)
     nenv (0.3.0)
     nokogiri (1.10.7)
@@ -93,6 +92,12 @@ GEM
     notiffany (0.1.3)
       nenv (~> 0.1)
       shellany (~> 0.0)
+    oauth2 (1.4.2)
+      faraday (>= 0.8, < 2.0)
+      jwt (>= 1.0, < 3.0)
+      multi_json (~> 1.3)
+      multi_xml (~> 0.5)
+      rack (>= 1.2, < 3)
     pg (1.1.4)
     pry (0.12.2)
       coderay (~> 1.1.0)
@@ -141,7 +146,7 @@ GEM
       sinatra (>= 1.0.0)
     thor (0.20.3)
     thread_safe (0.3.6)
-    tilt (2.0.9)
+    tilt (2.0.10)
     tzinfo (1.2.5)
       thread_safe (~> 0.1)
     url (0.3.2)
@@ -159,14 +164,17 @@ PLATFORMS
 DEPENDENCIES
   activerecord
   bcrypt
+  better_errors
   byebug
   capybara
   capybara-screenshot
   codecov
+  config_env
   cucumber
   foreman
   guard
   guard-cucumber
+  oauth2
   pg
   rack
   rack-test

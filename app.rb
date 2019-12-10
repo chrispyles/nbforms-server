@@ -9,6 +9,22 @@ require 'sinatra/activerecord'
 require 'csv'
 require 'json'
 
+if Sinatra::Base.development?
+	require 'byebug'
+	require 'better_errors'
+	configure :development do
+	  use BetterErrors::Middleware
+	  BetterErrors.application_root = File.expand_path('..', __FILE__)
+	end
+end
+
+# load the config environment
+require 'config_env'
+ConfigEnv.init("config/env.rb")
+
+# load auth helpers
+require_relative './helpers/auth.rb'
+
 # load the models
 current_dir = Dir.pwd
 Dir["#{current_dir}/models/*.rb"].each { |file| require file }
@@ -50,17 +66,28 @@ class App < Sinatra::Base
 			@user.save
 		end
 		if @user.test_password params[:password]
-			@user.api_key = User.generate_key
-			@user.save
-			@user.api_key
+			@user.set_api_key
 		else
 			"INVALID USERNAME"
 		end
 	end
 
+	get '/login' do
+		redirect auth_authorize_link
+	end
+
+	get '/logout' do
+	  auth_sign_out
+	end
+
+	get '/auth/callback' do
+	  auth_process_code params[:code]
+	  @user.set_api_key
+	end
+
 	# route to submit form
 	post "/submit" do
-		@user = User.where(username: params[:username]).first
+		@user = User.where(api_key: params[:api_key]).first
 		if @user.api_key == params[:api_key]
 			@question = Question.get_or_create_user_submission @user, params[:notebook], params[:identifier].to_s
 			@question.response = params[:response]

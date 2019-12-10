@@ -1,2 +1,6 @@
 tmp
 *.log
+
+# Ignore application configuration
+/config/application.yml
+/config/env.rb

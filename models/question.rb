@@ -20,7 +20,7 @@ class Question < ActiveRecord::Base
 			if user_hashes
 				row << User.find(user).hash_username
 			elsif usernames
-				row << User.find(user).username
+				row << User.find(user).email || User.find(user).username
 			end
 			questions.sort.each do |question|
 				begin

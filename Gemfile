@@ -8,10 +8,13 @@ gem 'activerecord'
 gem 'sinatra-activerecord'
 gem 'rake'
 gem 'bcrypt'
+gem 'oauth2'
+gem 'config_env'
 
 group :development do
 	gem 'rerun', '~> 0.13.0' 
 	gem 'byebug'
+	gem 'better_errors'
 end
 
 group :test do
