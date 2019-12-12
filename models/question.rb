@@ -1,8 +1,9 @@
 class Question < ActiveRecord::Base
 	belongs_to :user
+	belongs_to :notebook
 
 	def self.get_or_create_user_submission user, notebook, identifier
-		Question.where(user_id: user.id).where(notebook: notebook).where(identifier: identifier).first_or_initialize
+		Question.where(user_id: user.id).where(notebook_id: notebook.id).where(identifier: identifier).first_or_initialize
 	end
 
 	def self.to_2d_array notebook, questions, user_hashes, usernames
@@ -14,7 +15,7 @@ class Question < ActiveRecord::Base
 		end
 
 		idx = 1
-		relation = Question.where(notebook: notebook, identifier: questions)
+		relation = Question.where(notebook_id: notebook.id, identifier: questions)
 		relation.pluck(:user_id).uniq.each do |user|
 			row = []
 			if user_hashes
@@ -37,7 +38,7 @@ class Question < ActiveRecord::Base
 	end
 
 	def self.get_all_notebook_questions notebook, usernames=false
-		questions = Question.where(notebook: notebook).pluck(:identifier).uniq
+		questions = Question.where(notebook_id: notebook.id).pluck(:identifier).uniq
 		Question.to_2d_array notebook, questions, false, usernames
 	end
 end

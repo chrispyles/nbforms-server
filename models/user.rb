@@ -3,6 +3,7 @@ require 'digest'
 
 class User < ActiveRecord::Base
 	has_many :questions
+	has_many :attendance_submissions
 	validates :api_key, uniqueness: true
 
 	def hash_username

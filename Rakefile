@@ -7,6 +7,29 @@ require './app'
 require 'config_env/rake_tasks'
 ConfigEnv.init("#{__dir__}/config/env.rb")
 
+namespace :attendance do
+
+	desc 'Open attendance checks' 
+	task :open, [:notebook] do |t, args|
+		notebook = Notebook.where(identifier: args.notebook).first_or_create
+		notebook.update!(attendance_open: true)
+	end
+
+	desc 'Close attendance checks' 
+	task :close, [:notebook] do |t, args|
+		notebook = Notebook.where(identifier: args.notebook).first_or_create
+		notebook.update!(attendance_open: false)
+	end
+
+	desc "Get a report of a notebook's attendance"
+	task :report, [:notebook] do |t, args|
+		notebook = Notebook.where(identifier: args.notebook.to_s)
+		subs = AttendanceSubmission.where(notebook_id: notebook.id)
+		puts AttendanceSubmission.to_csv subs
+	end
+
+end
+
 namespace :clear do
 
 	desc 'Clear the database'
@@ -29,7 +52,8 @@ namespace :reports do
 
 	desc 'Generates a CSV of all responses to notebook'
 	task :notebook, [:id, :out_path] do |t, args|
-		questions = Question.get_all_notebook_questions args.id.to_s, true
+		notebook = Notebook.where(identifier: args.id.to_s).first
+		questions = Question.get_all_notebook_questions notebook, true
 		csv_string = rows_hash_to_csv_string questions
 		if args.out_path
 			File.open(args.out_path, 'w+') do |f|

@@ -89,17 +89,31 @@ class App < Sinatra::Base
 	# route to submit form
 	post "/submit" do
 		@user = User.where(api_key: params[:api_key]).first
-		@question = Question.get_or_create_user_submission @user, params[:notebook], params[:identifier].to_s
+		@notebook = Notebook.where(identifier: params[:notebook]).first_or_create
+		@question = Question.get_or_create_user_submission @user, @notebook, params[:identifier].to_s
 		@question.response = params[:response]
 		# @question.timestamp = Time.now
 		@question.save!
+	end
+
+	# route to check in for attendance
+	post "/attendance" do
+		@notebook = Notebook.where(identifier: params[:notebook]).first_or_create
+		if @notebook.attendance_open
+			@user = User.where(api_key: params[:api_key]).first
+			@sub = AttendanceSubmission.create(user_id: @user.id, submitted: DateTime.now, notebook_id: @notebook.id)
+			"ATTENDANCE RECORDED"
+		else
+			"ATTENDANCE CLOSED"
+		end
 	end
 
 	# route to extract data from questions
 	get "/data" do
 		@questions = params[:questions].split(',')
 		@user_hashes = params[:user_hashes] == "1"
-		@rows = Question.to_2d_array params[:notebook], @questions, @user_hashes, false
+		@notebook = Notebook.where(identifier: params[:notebook]).first_or_create
+		@rows = Question.to_2d_array @notebook, @questions, @user_hashes, false
 		content_type 'text/csv'
 		erb :csv
 	end

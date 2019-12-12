@@ -10,18 +10,32 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_12_09_041616) do
+ActiveRecord::Schema.define(version: 2019_12_12_082215) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
+  create_table "attendance_submissions", force: :cascade do |t|
+    t.bigint "user_id"
+    t.datetime "submitted"
+    t.bigint "notebook_id"
+    t.index ["notebook_id"], name: "index_attendance_submissions_on_notebook_id"
+    t.index ["user_id"], name: "index_attendance_submissions_on_user_id"
+  end
+
+  create_table "notebooks", force: :cascade do |t|
+    t.string "identifier"
+    t.boolean "attendance_open"
+  end
+
   create_table "questions", force: :cascade do |t|
     t.bigint "user_id"
+    t.bigint "notebook_id"
     t.string "identifier"
     t.string "response"
     t.string "user_hash"
-    t.string "notebook"
     t.datetime "timestamp"
+    t.index ["notebook_id"], name: "index_questions_on_notebook_id"
     t.index ["user_id"], name: "index_questions_on_user_id"
   end
 
