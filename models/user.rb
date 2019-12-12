@@ -6,7 +6,7 @@ class User < ActiveRecord::Base
 	validates :api_key, uniqueness: true
 
 	def hash_username
-		hashed = Digest::SHA1.hexdigest(username)
+		hashed = Digest::SHA1.hexdigest(email || username)
 		digits = []
 		15.times do
 			digits << hashed[rand(hashed.length)]		
