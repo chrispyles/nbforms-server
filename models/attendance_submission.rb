@@ -18,7 +18,7 @@ class AttendanceSubmission < ActiveRecord::Base
 					user_subs = subs.where(user_id: user_id, was_open: [false, nil]).order(submitted: :desc)
 					if user_subs.length > 0
 						s = user_subs.first
-						rows += [[user.email || user.username, s.submitted.to_s, s.was_open]]
+						rows += [[user.email || user.username, s.submitted.to_s, s.was_open || false]]
 					end
 				end
 			end
