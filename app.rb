@@ -103,19 +103,20 @@ class App < Sinatra::Base
 
 	# route to check in for attendance
 	post "/attendance" do
-		begin
-			@notebook = Notebook.where(identifier: params[:notebook]).first_or_create
-			@user = User.where(api_key: params[:api_key]).first
-			@sub = AttendanceSubmission.create!(
-				user_id: @user.id, 
-				submitted: DateTime.now, 
-				notebook_id: @notebook.id,
-				was_open: @notebook.attendance_open
-			)
-			"ATTENDANCE RECORDED"
-		rescue
-			"ATTENDANCE NOT RECORDED"
-		end
+		# begin
+		@notebook = Notebook.where(identifier: params[:notebook]).first_or_create
+		@user = User.where(api_key: params[:api_key]).first
+		@sub = AttendanceSubmission.create!(
+			user_id: @user.id, 
+			submitted: DateTime.now, 
+			notebook_id: @notebook.id,
+			was_open: @notebook.attendance_open
+		)
+		"ATTENDANCE RECORDED"
+		# rescue
+		# 	raise 
+		# 	"ATTENDANCE NOT RECORDED"
+		# end
 	end
 
 	# route to extract data from questions
