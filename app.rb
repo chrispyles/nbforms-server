@@ -81,7 +81,7 @@ class App < Sinatra::Base
 	end
 
 	get '/auth/callback' do
-	  auth_process_code params[:code]
+	  @user = auth_process_code params[:code]
 	  @user.set_api_key
 	  erb :api_key
 	end

@@ -3,6 +3,7 @@ require 'digest'
 
 class User < ActiveRecord::Base
 	has_many :questions
+	validates :api_key, uniqueness: true
 
 	def hash_username
 		hashed = Digest::SHA1.hexdigest(username)
