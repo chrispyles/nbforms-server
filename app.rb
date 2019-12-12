@@ -88,23 +88,33 @@ class App < Sinatra::Base
 
 	# route to submit form
 	post "/submit" do
-		@user = User.where(api_key: params[:api_key]).first
-		@notebook = Notebook.where(identifier: params[:notebook]).first_or_create
-		@question = Question.get_or_create_user_submission @user, @notebook, params[:identifier].to_s
-		@question.response = params[:response]
-		# @question.timestamp = Time.now
-		@question.save!
+		begin
+			@user = User.where(api_key: params[:api_key]).first
+			@notebook = Notebook.where(identifier: params[:notebook]).first_or_create
+			@question = Question.get_or_create_user_submission @user, @notebook, params[:identifier].to_s
+			@question.response = params[:response]
+			# @question.timestamp = Time.now
+			@question.save!
+			"SUBMISSION SUCCESSFUL"
+		rescue
+			"SUBMISSION UNSUCCESSFUL"
+		end
 	end
 
 	# route to check in for attendance
 	post "/attendance" do
-		@notebook = Notebook.where(identifier: params[:notebook]).first_or_create
-		if @notebook.attendance_open
+		begin
+			@notebook = Notebook.where(identifier: params[:notebook]).first_or_create
 			@user = User.where(api_key: params[:api_key]).first
-			@sub = AttendanceSubmission.create(user_id: @user.id, submitted: DateTime.now, notebook_id: @notebook.id)
+			@sub = AttendanceSubmission.create!(
+				user_id: @user.id, 
+				submitted: DateTime.now, 
+				notebook_id: @notebook.id,
+				was_open: @notebook.attendance_open
+			)
 			"ATTENDANCE RECORDED"
-		else
-			"ATTENDANCE CLOSED"
+		rescue
+			"ATTENDANCE NOT RECORDED"
 		end
 	end
 
