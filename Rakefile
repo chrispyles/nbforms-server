@@ -17,6 +17,9 @@ namespace :clear do
 	desc "Clear a user's responses"
 	task :user, [:username] do |t, args|
 		user = User.where(username: args.username).first
+		if user.nil?
+			user = User.where(email: args.username).first
+		end
 		user.questions.destroy_all
 	end
 
