@@ -23,9 +23,12 @@ namespace :attendance do
 
 	desc "Get a report of a notebook's attendance"
 	task :report, [:notebook] do |t, args|
-		notebook = Notebook.where(identifier: args.notebook.to_s).first_or_create
-		subs = AttendanceSubmission.where(notebook_id: notebook.id)
-		puts AttendanceSubmission.to_csv subs
+		if !args.nb_id.nil?
+			notebook = Notebook.where(identifier: args.nb_id.to_s).first_or_create
+			subs = AttendanceSubmission.where(notebook_id: notebook.id)
+		end
+		csv_string = AttendanceSubmission.to_csv subs, args.nb_id.nil?
+		puts csv_string
 	end
 
 end
