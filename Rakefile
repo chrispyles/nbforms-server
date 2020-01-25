@@ -3,6 +3,11 @@ require 'sinatra/activerecord'
 require 'sinatra/activerecord/rake'
 require './app'
 
+
+# TODO: add lock task
+# TODO: global variable with API key
+
+
 # heroku config tasks
 require 'config_env/rake_tasks'
 ConfigEnv.init("#{__dir__}/config/env.rb")
@@ -29,6 +34,26 @@ namespace :attendance do
 		end
 		csv_string = AttendanceSubmission.to_csv subs, args.nb_id.nil?
 		puts csv_string
+	end
+
+end
+
+namespace :lock do
+
+	desc 'Lock a question from being queried'
+	task :question, [:notebook, :question] do |t, args|
+		q = Question.where(notebook_id: args.notebook.to_s, identifier: args.question.to_s).first
+		q.update!(locked: true)
+	end
+
+end
+
+namespace :unlock do
+
+	desc 'Unlock a question from being queried'
+	task :question, [:notebook, :question] do |t, args|
+		q = Question.where(notebook_id: args.notebook.to_s, identifier: args.question.to_s).first
+		q.update!(locked: false)
 	end
 
 end

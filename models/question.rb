@@ -2,16 +2,27 @@ class Question < ActiveRecord::Base
 	belongs_to :user
 	belongs_to :notebook
 
+	def self.filter_for_locks questions, notebook
+		i = 0
+		to_delete = []
+		Question.where(notebook_id: notebook.id, identifier: questions, locked: [false, nil]).map { |q|
+			q.identifier
+		}
+	end
+
 	def self.get_or_create_user_submission user, notebook, identifier
 		Question.where(user_id: user.id).where(notebook_id: notebook.id).where(identifier: identifier).first_or_initialize
 	end
 
-	def self.to_2d_array notebook, questions, user_hashes, usernames
+	def self.to_2d_array notebook, questions, user_hashes, usernames, override_locks=false
 		rows = {}
+		if !override_locks
+			questions = Question.filter_for_locks questions, notebook
+		end
 		if user_hashes || usernames
 			rows[0] = ['user'] + questions.sort
 		else
-			rows[0] = questions
+			rows[0] = questions.sort
 		end
 
 		idx = 1

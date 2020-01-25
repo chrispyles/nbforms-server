@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_12_12_184205) do
+ActiveRecord::Schema.define(version: 2020_01_25_003218) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -36,6 +36,7 @@ ActiveRecord::Schema.define(version: 2019_12_12_184205) do
     t.string "response"
     t.string "user_hash"
     t.datetime "timestamp"
+    t.boolean "locked"
     t.index ["notebook_id"], name: "index_questions_on_notebook_id"
     t.index ["user_id"], name: "index_questions_on_user_id"
   end
