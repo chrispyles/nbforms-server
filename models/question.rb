@@ -19,6 +19,9 @@ class Question < ActiveRecord::Base
 		if !override_locks
 			questions = Question.filter_for_locks questions, notebook
 		end
+		if questions.length == 0
+			raise 'No questions'
+		end
 		if user_hashes || usernames
 			rows[0] = ['user'] + questions.sort
 		else

@@ -124,9 +124,14 @@ class App < Sinatra::Base
 		@questions = params[:questions].split(',')
 		@user_hashes = params[:user_hashes] == "1"
 		@notebook = Notebook.where(identifier: params[:notebook]).first_or_create
-		@rows = Question.to_2d_array @notebook, @questions, @user_hashes, false
-		content_type 'text/csv'
-		erb :csv
+		begin
+			@rows = Question.to_2d_array @notebook, @questions, @user_hashes, false
+		rescue
+			"NO UNLOCKED QUESTIONS"
+		else
+			content_type 'text/csv'
+			erb :csv
+		end
 	end
 
 	# route to generate a config file

@@ -3,11 +3,6 @@ require 'sinatra/activerecord'
 require 'sinatra/activerecord/rake'
 require './app'
 
-
-# TODO: add lock task
-# TODO: global variable with API key
-
-
 # heroku config tasks
 require 'config_env/rake_tasks'
 ConfigEnv.init("#{__dir__}/config/env.rb")
@@ -28,11 +23,11 @@ namespace :attendance do
 
 	desc "Get a report of a notebook's attendance"
 	task :report, [:notebook] do |t, args|
-		if !args.nb_id.nil?
-			notebook = Notebook.where(identifier: args.nb_id.to_s).first_or_create
+		if !args.notebook.nil?
+			notebook = Notebook.where(identifier: args.notebook.to_s).first_or_create
 			subs = AttendanceSubmission.where(notebook_id: notebook.id)
 		end
-		csv_string = AttendanceSubmission.to_csv subs, args.nb_id.nil?
+		csv_string = AttendanceSubmission.to_csv subs, args.notebook.nil?
 		puts csv_string
 	end
 
@@ -46,6 +41,14 @@ namespace :lock do
 		q.update!(locked: true)
 	end
 
+	desc 'Lock a notebook from being queried'
+	task :notebook, [:notebook] do |t, args|
+		notebook = Notebook.where(identifier: args.notebook.to_s).first_or_create
+		notebook.questions.each do |q|
+			q.update!(locked: true)
+		end
+	end
+
 end
 
 namespace :unlock do
@@ -54,6 +57,14 @@ namespace :unlock do
 	task :question, [:notebook, :question] do |t, args|
 		q = Question.where(notebook_id: args.notebook.to_s, identifier: args.question.to_s).first
 		q.update!(locked: false)
+	end
+
+	desc 'Unlock a notebook from being queried'
+	task :notebook, [:notebook] do |t, args|
+		notebook = Notebook.where(identifier: args.notebook.to_s).first_or_create
+		notebook.questions.each do |q|
+			q.update!(locked: false)
+		end
 	end
 
 end
