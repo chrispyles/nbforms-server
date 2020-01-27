@@ -5,9 +5,10 @@ class Question < ActiveRecord::Base
 	def self.filter_for_locks questions, notebook
 		i = 0
 		to_delete = []
-		Question.where(notebook_id: notebook.id, identifier: questions, locked: [false, nil]).map { |q|
+		qs = Question.where(notebook_id: notebook.id, identifier: questions, locked: [false, nil]).map { |q|
 			q.identifier
 		}
+		qs.uniq
 	end
 
 	def self.get_or_create_user_submission user, notebook, identifier
