@@ -2,6 +2,7 @@ require 'rubygems'
 require 'sinatra/activerecord'
 require 'sinatra/activerecord/rake'
 require './app'
+require 'csv'
 
 # heroku config tasks
 require 'config_env/rake_tasks'
@@ -87,7 +88,7 @@ namespace :clear do
 
 	desc "Clear all submissions for a notebook"
 	task :notebook, [:notebook] do |t, args|
-		nb = Notebook.where(identifier: args.notebook).first
+		nb = Notebook.where(identifier: args.notebook.to_s).first
 		nb.questions.destroy_all
 	end
 
@@ -96,7 +97,7 @@ end
 namespace :reports do
 
 	desc 'Generates a CSV of all responses to notebook'
-	task :notebook, [:id, :out_path] do |t, args|
+	task :responses, [:id, :out_path] do |t, args|
 		notebook = Notebook.where(identifier: args.id.to_s).first
 		questions = Question.get_all_notebook_questions notebook, true
 		csv_string = rows_hash_to_csv_string questions
@@ -107,6 +108,17 @@ namespace :reports do
 		else
 			puts csv_string
 		end
+	end
+
+	desc 'Generates a detailed list of notebooks and their attributes'
+	task :notebooks do
+		csv = CSV.generate do |csv|
+			csv << Notebook.attribute_names
+			Notebook.order(:id).each do |nb|
+				csv << nb.attributes.values
+			end
+		end
+		puts csv
 	end
 
 end
