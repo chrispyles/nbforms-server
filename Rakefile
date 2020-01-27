@@ -85,6 +85,12 @@ namespace :clear do
 		user.questions.destroy_all
 	end
 
+	desc "Clear all submissions for a notebook"
+	task :notebook, [:notebook] do |t, args|
+		nb = Notebook.where(identifier: args.notebook).first
+		nb.questions.destroy_all
+	end
+
 end
 
 namespace :reports do
