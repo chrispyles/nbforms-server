@@ -62,7 +62,7 @@ class App < Sinatra::Base
   post "/auth" do
     if ENV["NO_AUTH_REQUIRED"].nil? && !(ENV["NO_AUTH_REQUIRED"] =~ /(tr?u?e?|ye?s?)/i)
       @user = User.where(username: params[:username]).first_or_initialize
-      if !@user.auth_required
+      if !@user.oauth_required
         if @user.password_hash.nil?
           @user.password_hash = User.hash_password params[:password]
           @user.save
