@@ -59,17 +59,26 @@ class App < Sinatra::Base
 	end
 
 	# route to authenticate
-	post "/auth" do
-		@user = User.where(username: params[:username]).first_or_initialize
-		if @user.password_hash.nil?
-			@user.password_hash = User.hash_password params[:password]
-			@user.save
-		end
-		if @user.test_password params[:password]
-			@user.set_api_key
-		else
-			"INVALID USERNAME"
-		end
+  post "/auth" do
+    if ENV["NO_AUTH_REQUIRED"].nil? && !(ENV["NO_AUTH_REQUIRED"] =~ /(tr?u?e?|ye?s?)/i)
+      @user = User.where(username: params[:username]).first_or_initialize
+      if !@user.auth_required
+        if @user.password_hash.nil?
+          @user.password_hash = User.hash_password params[:password]
+          @user.save
+        end
+        if @user.test_password params[:password]
+          @user.set_api_key
+        else
+          "INVALID USERNAME"
+        end
+      else
+        "OAUTH REQUIRED FOR THIS USER"
+      end
+    else
+      @user = User.create()
+      @user.set_api_key
+    end
 	end
 
 	get '/login' do

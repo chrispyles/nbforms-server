@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_01_25_003218) do
+ActiveRecord::Schema.define(version: 2020_01_29_155152) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -47,6 +47,7 @@ ActiveRecord::Schema.define(version: 2020_01_25_003218) do
     t.string "api_key"
     t.string "name"
     t.string "email"
+    t.boolean "oauth_required"
   end
 
 end

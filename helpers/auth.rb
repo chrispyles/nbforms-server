@@ -25,6 +25,7 @@ def auth_process_code(code)
   @new_token = auth_client.auth_code.get_token(code, :redirect_uri => auth_callback_full_url)
   @user_info = auth_token_wrapper.get("https://www.googleapis.com/oauth2/v3/userinfo").parsed
   user = User.where(name: @user_info['name'], email: @user_info['email']).first_or_initialize
+  user.oauth_required = true
   # debugger
   user.save!
   return user
