@@ -3,8 +3,6 @@
 #####           by Chris Pyles           #####
 ##############################################
 
-# TODO: no auth
-
 require 'sinatra'
 require 'sinatra/flash'
 require 'sinatra/activerecord'
@@ -62,43 +60,30 @@ class App < Sinatra::Base
 
 	# route to authenticate
 	post "/auth" do
-		if !ENV["NO_AUTH_REQUIRED"].nil?
-			@user = User.where(username: params[:username]).first_or_initialize
-			if @user.password_hash.nil?
-				@user.password_hash = User.hash_password params[:password]
-				@user.save
-			end
-			if @user.test_password params[:password]
-				@user.set_api_key
-			else
-				"INVALID USERNAME"
-      end
-    else
-      @user = User.create!()
-      @user.set_api_key
+		@user = User.where(username: params[:username]).first_or_initialize
+		if @user.password_hash.nil?
+			@user.password_hash = User.hash_password params[:password]
+			@user.save
+		end
+		if @user.test_password params[:password]
+			@user.set_api_key
+		else
+			"INVALID USERNAME"
 		end
 	end
 
 	get '/login' do
-		if !ENV["NO_AUTH_REQUIRED"].nil?
-			redirect auth_authorize_link
-		else
-			"NO AUTH REQUIRED"
-		end
+		redirect auth_authorize_link
 	end
 
 	get '/logout' do
-		if !ENV["NO_AUTH_REQUIRED"].nil?
-      auth_sign_out
-    end
+	  auth_sign_out
 	end
 
-  get '/auth/callback' do
-    if !ENV["NO_AUTH_REQUIRED"].nil?
-  	  @user = auth_process_code params[:code]
-      @user.set_api_key
-      erb :api_key
-    end
+	get '/auth/callback' do
+	  @user = auth_process_code params[:code]
+	  @user.set_api_key
+	  erb :api_key
 	end
 
 	# route to submit form
