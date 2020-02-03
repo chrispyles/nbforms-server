@@ -10,6 +10,7 @@ gem 'rake'
 gem 'bcrypt'
 gem 'oauth2'
 gem 'config_env'
+gem 'activesupport'
 
 group :development do
 	gem 'rerun', '~> 0.13.0' 

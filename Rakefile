@@ -1,4 +1,6 @@
 require 'rubygems'
+require 'active_support/deprecation'
+ActiveSupport::Deprecation.silenced = true
 require 'sinatra/activerecord'
 require 'sinatra/activerecord/rake'
 require './app'

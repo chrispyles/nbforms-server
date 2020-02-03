@@ -163,6 +163,7 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord
+  activesupport
   bcrypt
   better_errors
   byebug
