@@ -100,10 +100,21 @@ class App < Sinatra::Base
 		begin
 			@user = User.where(api_key: params[:api_key]).first
 			@notebook = Notebook.where(identifier: params[:notebook]).first_or_create
-			@question = Question.get_or_create_user_submission @user, @notebook, params[:identifier].to_s
-			@question.response = params[:response]
-			# @question.timestamp = Time.now
-			@question.save!
+			if params[:identifiers].nil? and params[:responses].nil? and !params[:identifier].nil? and !params[:response].nil?
+				@question = Question.get_or_create_user_submission @user, @notebook, params[:identifier].to_s
+				@question.response = params[:response]
+				# @question.timestamp = Time.now
+				@question.save!
+			elsif !params[:identifiers].nil? and !params[:responses].nil?
+				params[:identifiers].length.times do |i|
+					@question = Question.get_or_create_user_submission @user, @notebook, params[:identifiers][i].to_s
+					@question.response = params[:responses][i]
+					# @question.timestamp = Time.now
+					@question.save!
+				end
+			else
+				raise "no correct params"
+			end
 			"SUBMISSION SUCCESSFUL"
 		rescue
 			"SUBMISSION UNSUCCESSFUL"
