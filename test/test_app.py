@@ -92,6 +92,30 @@ def test_auth(mocked_random, app, client, seed_data, username, password, want_co
     assert u.api_key == ("deadbeef" if want_code == 200 else None)
 
 
+@mock.patch("nbforms_server.models.random")
+@mock.patch("nbforms_server.models.ph")
+def test_auth_password_rehash(mocked_ph, mocked_random, app, client, seed_data):
+  """Test the ``/auth`` route when a password rehash is required."""
+  mocked_random.randbytes.return_value = b"\xde\xad\xbe\xef"
+  mocked_ph.check_needs_rehash.return_value = True
+  mocked_ph.hash.return_value = "skywalker (but hashed)"
+
+  res = client.post(
+    "/auth",
+    data = json.dumps({"username": "anakin", "password": "skywalker"}),
+    content_type = "application/json",
+  )
+
+  assert res.status_code == 200
+  assert res.data.decode() == "deadbeef"
+  mocked_ph.hash.assert_called_with("skywalker")
+
+  # check that the API key in the DB is correct
+  with app.app_context():
+    u = db.session.query(User).filter_by(username="anakin").first()
+    assert u.password_hash == "skywalker (but hashed)"
+
+
 @mock.patch.dict(os.environ, {"NBFORMS_SERVER_NO_AUTH_REQUIRED": "true"})
 @mock.patch("nbforms_server.models.random")
 def test_no_auth_required(mocked_random, app, client):
@@ -137,7 +161,7 @@ def test_no_auth_required(mocked_random, app, client):
       },
     ],
   ),
-  # nonexistant notebook
+  # nonexistent notebook
   (
     {
       "api_key": "deadbeef",
@@ -172,7 +196,7 @@ def test_no_auth_required(mocked_random, app, client):
       },
     ],
   ),
-  # nonexistant API key
+  # nonexistent API key
   (
     {
       "api_key": "notdeadbeef",
@@ -392,7 +416,7 @@ def test_submit_update_old_responses(mocked_dt, app, client, seed_responses, set
       },
     ],
   ),
-  # nonexistant notebook
+  # nonexistent notebook
   (
     {
       "api_key": "deadbeef",
@@ -409,7 +433,7 @@ def test_submit_update_old_responses(mocked_dt, app, client, seed_responses, set
       },
     ],
   ),
-  # nonexistant API key
+  # nonexistent API key
   (
     {
       "api_key": "notdeadbeef",
@@ -528,15 +552,15 @@ def test_attendance_multiple_submissions(mocked_dt, app, client, seed_attendance
   ("naboo", None, None, 200, dedent("""\
     c3p0,r2d2
     anakin naboo c3p0,anakin naboo r2d2
-    obi-wan naboo c3p0,obi-wan naboo r2d2
     jarjar naboo c3p0,
     leia naboo c3p0,
+    obi-wan naboo c3p0,obi-wan naboo r2d2
   """)),
   ("coruscant", None, None, 200, dedent("""\
     bb2,c3p0
     ,anakin coruscant c3p0
-    ,obi-wan coruscant c3p0
     jarjar coruscant bb2,
+    ,obi-wan coruscant c3p0
   """)),
   # notebook exists but has no responses
   ("tatooine", None, None, 400, "no responses found"),
@@ -544,11 +568,11 @@ def test_attendance_multiple_submissions(mocked_dt, app, client, seed_attendance
   ("naboo", [], False, 200, dedent("""\
     c3p0,r2d2
     anakin naboo c3p0,anakin naboo r2d2
-    obi-wan naboo c3p0,obi-wan naboo r2d2
     jarjar naboo c3p0,
     leia naboo c3p0,
+    obi-wan naboo c3p0,obi-wan naboo r2d2
   """)),
-  # nonexistant notebook
+  # nonexistent notebook
   ("mustafar", None, None, 400, "no responses found"),
   # limit questions
   ("naboo", ["r2d2"], None, 200, dedent("""\
@@ -560,14 +584,15 @@ def test_attendance_multiple_submissions(mocked_dt, app, client, seed_attendance
   ("naboo", None, True, 200, dedent("""\
     user,c3p0,r2d2
     370b126df07859afa569,anakin naboo c3p0,anakin naboo r2d2
-    b642fa7c51f517fa4092,obi-wan naboo c3p0,obi-wan naboo r2d2
     b5d7f583fe24ed18083a,jarjar naboo c3p0,
     b0dea5555379c9e3384d,leia naboo c3p0,
+    b642fa7c51f517fa4092,obi-wan naboo c3p0,obi-wan naboo r2d2
   """)),
   # no notebook
   ("", None, None, 400, "no notebook specified")
 ))
-def test_data(client, seed_responses, notebook, questions, user_hashes, want_code, want_body):
+@mock.patch("nbforms_server.models.random")
+def test_data(mocked_random, client, seed_responses, notebook, questions, user_hashes, want_code, want_body):
   """Test the ``/data`` route."""
   body = {"notebook": notebook}
   if questions is not None:
@@ -583,3 +608,6 @@ def test_data(client, seed_responses, notebook, questions, user_hashes, want_cod
 
   assert res.status_code == want_code
   assert res.data.decode() == want_body
+
+  # check that output rows were (or in this case would have been) shuffled
+  if user_hashes: mocked_random.shuffle.assert_called()

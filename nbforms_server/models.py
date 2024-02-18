@@ -176,7 +176,7 @@ class Notebook(db.Model):
     return [
       self.id,
       self.identifier,
-      self.attendance_open,
+      self.attendance_open or False,
     ]
 
 
@@ -248,7 +248,7 @@ class AttendanceSubmission(db.Model):
       "user id",
       "username",
       "notebook",
-      "submitted",
+      "timestamp",
       "was_open",
     ]
 
@@ -261,7 +261,7 @@ class AttendanceSubmission(db.Model):
       self.user_id,
       self.user.username,
       self.notebook.identifier,
-      str(self.submitted),
+      str(self.timestamp),
       self.was_open,
     ]
 
@@ -293,9 +293,6 @@ def export_responses(
   empty, no question filtering is applied. Usernames or pseudonymized usernames can be included by
   setting ``usernames`` or ``user_hashes`` to true, resp.
   """
-  if user_hashes and usernames:
-    return [], "can request either user hashes or usernames but not both"
-
   # query for all responses matching the notebook and requested questions
   stmt = select(Response).where(Response.notebook == notebook)
   if req_questions:
@@ -310,13 +307,13 @@ def export_responses(
   # group responses by user and question
   questions = set()
   by_user_and_question: Dict[int, Dict[str, Response]] = {}
-  users_by_id: Dict[int, User] = {}
+  users_by_username: Dict[str, User] = {}
   for r in responses:
     questions.add(r.question_identifier)
     if r.user_id not in by_user_and_question:
       by_user_and_question[r.user_id] = {}
     by_user_and_question[r.user_id][r.question_identifier] = r
-    users_by_id[r.user_id] = r.user
+    users_by_username[r.user.username] = r.user
 
   # ensure there is a column for every requested question
   for q in req_questions:
@@ -325,8 +322,8 @@ def export_responses(
   questions = sorted(questions)
 
   rows = [(["user"] if user_hashes or usernames else []) + questions]
-  for uid in sorted(users_by_id.keys()):
-    u = users_by_id[uid]
+  for un in sorted(users_by_username.keys()):
+    u = users_by_username[un]
     row = []
     if user_hashes:
       row.append(u.hash_username())
@@ -342,5 +339,12 @@ def export_responses(
       row.append(res)
 
     rows.append(row)
+
+  # if pseudonymization is enabled, randomize the ordering of the returned rows so as not to leak
+  # any information, since by default the rows are sorted by username
+  if user_hashes:
+    shuffled_rows = rows[1:]
+    random.shuffle(shuffled_rows)
+    rows = [rows[0]] + shuffled_rows
 
   return rows, None

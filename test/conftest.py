@@ -15,6 +15,9 @@ from nbforms_server.models import (
 
 @pytest.fixture
 def app():
+  """
+  A fixture that provides a testing instance of the flask app.
+  """
   # mock out os so that the instance path isn't actually created
   with mock.patch("nbforms_server.os"):
     app = create_app({
@@ -26,6 +29,10 @@ def app():
 
 @pytest.fixture(autouse=True)
 def patch_cli_create_app(app):
+  """
+  A fixture that patches ``nbforms_server.__main__.create_app`` so that it returns the existing
+  testing app instance.
+  """
   with mock.patch("nbforms_server.__main__.create_app") as mocked_create_app:
     mocked_create_app.return_value = app
     yield
@@ -33,6 +40,9 @@ def patch_cli_create_app(app):
 
 @pytest.fixture(autouse=True)
 def patch_cli_get_db_path():
+  """
+  A fixture that patches ``nbforms_server.__main__.get_db_path`` so that an in-memory db is used.
+  """
   with mock.patch("nbforms_server.__main__.get_db_path") as mocked_get_db_path:
     mocked_get_db_path.return_value = ":memory:"
     yield
@@ -40,12 +50,10 @@ def patch_cli_get_db_path():
 
 @pytest.fixture
 def client(app):
+  """
+  A fixture that provides a flask testing client.
+  """
   return app.test_client()
-
-
-@pytest.fixture
-def runner(app):
-  return app.test_cli_runner()
 
 
 def make_timestamp(hour):
@@ -54,6 +62,9 @@ def make_timestamp(hour):
 
 @pytest.fixture
 def seed_data(app):
+  """
+  A fixture that seeds the database with users and notebooks.
+  """
   users = [
     User.with_credentials("anakin", "skywalker"),
     User.with_credentials("obi-wan", "kenobi"),
@@ -78,6 +89,9 @@ def seed_data(app):
 
 @pytest.fixture
 def seed_responses(app, seed_data):
+  """
+  A fixture that seeds the database with users, notebooks, and responses.
+  """
   users, notebooks = seed_data
   responses = [
     Response(user=users[0], notebook=notebooks[0], question_identifier="c3p0", response="anakin naboo c3p0", timestamp=make_timestamp(12)),
@@ -101,6 +115,9 @@ def seed_responses(app, seed_data):
 
 @pytest.fixture
 def seed_attendance_submissions(app, seed_data):
+  """
+  A fixture that seeds the database with users, notebooks, and attendance submissions.
+  """
   users, notebooks = seed_data
   submissions = [
     AttendanceSubmission(user=users[0], notebook=notebooks[0], was_open=False, timestamp=make_timestamp(12)),
@@ -117,6 +134,10 @@ def seed_attendance_submissions(app, seed_data):
 
 @pytest.fixture
 def set_api_keys(app):
+  """
+  A fixture that provides a function to set the API keys for users. The function takes a single
+  argument, a dictionary mapping usernames to API keys.
+  """
   def do_set(usernames_to_keys):
     with app.app_context():
       for username, key in usernames_to_keys.items():

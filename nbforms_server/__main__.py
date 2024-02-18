@@ -199,8 +199,8 @@ def reports_users(ctx: Context, dest: IO):
   """
   with ctx.app.app_context():
     users = db.session.query(User).order_by(User.username).all()
+    csv = to_csv([User.header_row(), *(u.to_row() for u in users)])
 
-  csv = to_csv([User.header_row(), *(u.to_row() for u in users)])
   dest.write(csv)
 
 
@@ -214,8 +214,8 @@ def reports_notebooks(ctx: Context, dest: IO):
   """
   with ctx.app.app_context():
     nbs = db.session.query(Notebook).order_by(Notebook.identifier).all()
+    csv = to_csv([Notebook.header_row(), *(nb.to_row() for nb in nbs)])
 
-  csv = to_csv([Notebook.header_row(), *(nb.to_row() for nb in nbs)])
   dest.write(csv)
 
 
@@ -249,9 +249,9 @@ def attendance_report(ctx: Context, notebook: str, dest: IO):
   """
   with ctx.app.app_context():
     nb = ctx.maybe_get_or_create_notebook(notebook, False)
-    subms = db.session.query(AttendanceSubmission).filter_by(notebook=nb).all()
+    subms = db.session.query(AttendanceSubmission).filter_by(notebook=nb).join(User).order_by(User.username).all()
+    csv = to_csv([AttendanceSubmission.header_row(), *(s.to_row() for s in subms)])
 
-  csv = to_csv([AttendanceSubmission.header_row(), *(s.to_row() for s in subms)])
   dest.write(csv)
 
 
@@ -272,7 +272,7 @@ def seed(ctx: Context, file: IO):
   """
   rows = list(csv.reader(file))
   if rows[0] != ["username", "password"]:
-    raise ValueError("CSV file does not contain expected headers")
+    raise ValueError("CSV file does not contain expected headers; the columns should be 'username' and 'password' (in that order)")
 
   with ctx.app.app_context():
     for i, r in enumerate(rows[1:]):
