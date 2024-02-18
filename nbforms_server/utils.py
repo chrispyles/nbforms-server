@@ -14,6 +14,9 @@ DB_FILENAME = "nbforms_server.db"
 
 
 def get_db_path(app: "Flask") -> str:
+  """
+  Get the server DB file path for the provided app instance.
+  """
   return os.path.join(app.instance_path, DB_FILENAME)
 
 
