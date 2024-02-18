@@ -302,8 +302,6 @@ def export_responses(
   if len(responses) == 0:
     return [], "no responses found"
 
-  # TODO: this impl doesn't ensure that the latest response is used
-
   # group responses by user and question
   questions = set()
   by_user_and_question: Dict[int, Dict[str, Response]] = {}

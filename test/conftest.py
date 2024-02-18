@@ -103,8 +103,6 @@ def seed_responses(app, seed_data):
     Response(user=users[0], notebook=notebooks[1], question_identifier="c3p0", response="anakin coruscant c3p0", timestamp=make_timestamp(18)),
     Response(user=users[1], notebook=notebooks[1], question_identifier="c3p0", response="obi-wan coruscant c3p0", timestamp=make_timestamp(19)),
     Response(user=users[2], notebook=notebooks[1], question_identifier="bb2", response="jarjar coruscant bb2", timestamp=make_timestamp(20)),
-    # TODO: duplicate responses aren't handled yet but once they are this should be uncommented
-    # Response(user=users[2], notebook=notebooks[1], question_identifier="bb2", response="jarjar coruscant bb2 2", timestamp=make_timestamp(21)),
   ]
 
   with app.app_context():
