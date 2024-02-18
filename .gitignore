@@ -1,6 +1,10 @@
 tmp
 *.log
-
-# Ignore application configuration
-/config/application.yml
-/config/env.rb
+.venv
+/instance
+/.pytest_cache
+/htmlcov
+__pycache__
+/.coverage
+/TODOs
+/seed.csv

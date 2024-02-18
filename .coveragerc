@@ -1,0 +1,20 @@
+[run]
+source = nbforms_server
+
+[report]
+exclude_lines =
+  # Have to re-enable the standard pragma
+  pragma: no cover
+
+  # Don't complain if tests don't hit defensive assertion code:
+  raise NotImplementedError
+
+  # ignore statements only run during type checking
+  if TYPE_CHECKING:
+
+  # ignore custom reprs
+  def __repr__
+
+omit =
+  # This file is meant to be used interactively
+  nbforms_server/console.py

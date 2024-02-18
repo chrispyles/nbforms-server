@@ -1,0 +1,47 @@
+# Workflow for running the test suite
+
+name: Run tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: docker/setup-buildx-action@v2
+        with:
+          install: true
+
+      - uses: getsentry/action-setup-venv@v1.0.4
+        with:
+          python-version: 3.11
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+          install-cmd: pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Run tests
+        run: |
+          source .venv/bin/activate
+          coverage run -m pytest -vv
+          coverage xml -i
+
+      - uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
+          verbose: true
