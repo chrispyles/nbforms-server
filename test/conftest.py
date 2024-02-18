@@ -46,11 +46,24 @@ def seed_data(app):
     User.with_credentials("jarjar", "binks"),
     User.with_credentials("leia", "organa"),
   ]
+
   notebooks = [
     Notebook(identifier="naboo"),
     Notebook(identifier="coruscant"),
     Notebook(identifier="tatooine"),
   ]
+
+  with app.app_context():
+    for e in [*users, *notebooks]:
+      db.session.add(e)
+    db.session.commit()
+
+  return users, notebooks
+
+
+@pytest.fixture
+def seed_responses(app, seed_data):
+  users, notebooks = seed_data
   responses = [
     Response(user=users[0], notebook=notebooks[0], question_identifier="c3p0", response="anakin naboo c3p0", timestamp=make_timestamp(12)),
     Response(user=users[1], notebook=notebooks[0], question_identifier="c3p0", response="obi-wan naboo c3p0", timestamp=make_timestamp(13)),
@@ -64,13 +77,37 @@ def seed_data(app):
     # TODO: duplicate responses aren't handled yet but once they are this should be uncommented
     # Response(user=users[2], notebook=notebooks[1], question_identifier="bb2", response="jarjar coruscant bb2 2", timestamp=make_timestamp(21)),
   ]
+
+  with app.app_context():
+    for e in responses:
+      db.session.add(e)
+    db.session.commit()
+
+
+@pytest.fixture
+def seed_attendance_submissions(seed_data):
+  users, notebooks = seed_data
   submissions = [
     AttendanceSubmission(user=users[0], notebook=notebooks[0], was_open=False, timestamp=make_timestamp(12)),
     AttendanceSubmission(user=users[1], notebook=notebooks[0], was_open=True, timestamp=make_timestamp(13)),
     AttendanceSubmission(user=users[2], notebook=notebooks[0], was_open=True, timestamp=make_timestamp(13)),
     AttendanceSubmission(user=users[3], notebook=notebooks[0], was_open=False, timestamp=make_timestamp(14)),
   ]
+
   with app.app_context():
-    for e in [*users, *notebooks, *responses, *submissions]:
+    for e in submissions:
       db.session.add(e)
     db.session.commit()
+
+
+@pytest.fixture
+def set_api_keys(app):
+  def do_set(usernames_to_keys):
+    with app.app_context():
+      for username, key in usernames_to_keys.items():
+        u = db.session.query(User).filter_by(username=username).first()
+        u.api_key = key
+        db.session.add(u)
+      db.session.commit()
+
+  return do_set
