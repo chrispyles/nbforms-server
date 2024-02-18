@@ -1,4 +1,4 @@
-# nbforms Server
+# nbforms-server
 
 [![Run tests](https://github.com/chrispyles/nbforms-server/actions/workflows/run-tests.yml/badge.svg)](https://github.com/chrispyles/nbforms-server/actions/workflows/run-tests.yml)
 
