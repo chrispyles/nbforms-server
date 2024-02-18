@@ -14,26 +14,26 @@
     crossorigin="anonymous"
   >
 
-  <!-- Custom CSS and JavaScript -->
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    h1 {
+      padding-top: 30px;
+    }
+
+    h2 {
+      padding-top: 20px;
+    }
+  </style>
 </head>
 <body>
-
   <div class="container">
 
     <h1>nbforms Server</h1>
 
-    <p>This is a server for the Python package nbforms. Use the Python API to interact with it.</p>
-
-    <h4>Config Generator</h4>
-
     <p>
-      This webapp comes with an
-      <a href="{{ url_for('static', filename='config_generator.html') }}">nbforms config generator</a>
-      to help you generate the config JSON file.
+      This is a server for the Python package nbforms. Use the Python API to interact with it.
     </p>
 
-    <h4>Documentation</h4>
+    <h2>Documentation</h2>
 
     <p>
       The documentation for nbforms and nbforms-server can be found
@@ -41,6 +41,5 @@
     </p>
 
   </div>
-
 </body>
 </html>
