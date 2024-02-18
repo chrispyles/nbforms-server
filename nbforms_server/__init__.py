@@ -46,7 +46,7 @@ def create_app(config=None) -> Flask:
     Authenticate a user, then generate and return a new API key for them.
     """
     if os.environ.get("NBFORMS_SERVER_NO_AUTH_REQUIRED", "false") == "true":
-      user = User()
+      user = User.from_no_auth()
       user.set_api_key()
       db.session.add(user)
 
@@ -57,7 +57,10 @@ def create_app(config=None) -> Flask:
           return f"no {k} specified", 400
 
       user = get_or_create(db.session, User, username=body.get("username"))
-      if user.password_hash is None:
+      if user.no_auth:
+        return "invalid login", 400
+
+      elif user.password_hash is None:
         user.set_password(body.get("password"))
         user.set_api_key()
         db.session.add(user)
@@ -68,7 +71,7 @@ def create_app(config=None) -> Flask:
 
       else:
         return "invalid login", 400
-    
+
     db.session.commit()
     return user.api_key
 

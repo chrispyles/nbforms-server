@@ -24,6 +24,20 @@ def app():
   return app
 
 
+@pytest.fixture(autouse=True)
+def patch_cli_create_app(app):
+  with mock.patch("nbforms_server.__main__.create_app") as mocked_create_app:
+    mocked_create_app.return_value = app
+    yield
+
+
+@pytest.fixture(autouse=True)
+def patch_cli_get_db_path():
+  with mock.patch("nbforms_server.__main__.get_db_path") as mocked_get_db_path:
+    mocked_get_db_path.return_value = ":memory:"
+    yield
+
+
 @pytest.fixture
 def client(app):
   return app.test_client()
@@ -45,11 +59,12 @@ def seed_data(app):
     User.with_credentials("obi-wan", "kenobi"),
     User.with_credentials("jarjar", "binks"),
     User.with_credentials("leia", "organa"),
+    User(username="noauth_han", password_hash="", no_auth=True),
   ]
 
   notebooks = [
     Notebook(identifier="naboo"),
-    Notebook(identifier="coruscant"),
+    Notebook(identifier="coruscant", attendance_open=True),
     Notebook(identifier="tatooine"),
   ]
 
@@ -85,7 +100,7 @@ def seed_responses(app, seed_data):
 
 
 @pytest.fixture
-def seed_attendance_submissions(seed_data):
+def seed_attendance_submissions(app, seed_data):
   users, notebooks = seed_data
   submissions = [
     AttendanceSubmission(user=users[0], notebook=notebooks[0], was_open=False, timestamp=make_timestamp(12)),

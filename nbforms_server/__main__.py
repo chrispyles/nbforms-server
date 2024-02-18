@@ -21,31 +21,17 @@ from .models import (
 from .utils import get_db_path, to_csv
 
 if TYPE_CHECKING:
+  from flask import Flask
   from sqlalchemy.orm import Session as SessionType
 
 
-def create_session(debug: bool = False):
-  """
-  Create a sqlalchemy session.
-  """
-  app = create_app()
-  engine = create_engine(f"sqlite:///{get_db_path(app)}", echo = debug)
-  Session.configure(bind=engine)
-  return Session()
-
-
-def maybe_get_or_create_notebook(session: "SessionType", identifier: str, create: bool):
-  """
-  Like ``get_or_create`` for a ``Notebook``, but it will only create the instance of ``create`` is
-  true (otherwise it throws a ``ValueError`` if the instance is not found in the DB).
-  """
-  if create:
-    return get_or_create(session, Notebook, identifier=identifier)
-  else:
-    nb = session.query(Notebook).filter_by(identifier=identifier).first()
-    if not nb:
-      raise ValueError(f"No such notebook: {identifier}")
-    return nb
+# def create_session(app: "Flask", debug: bool = False):
+#   """
+#   Create a sqlalchemy session.
+#   """
+#   engine = create_engine(f"sqlite:///{get_db_path(app)}", echo = debug)
+#   Session.configure(bind=engine)
+#   return Session()
 
 
 class Context:
@@ -56,12 +42,29 @@ class Context:
   debug: bool
   """whether debug mode is enabled"""
 
+  app: "Flask"
+
   session: "SessionType"
   """the sqlalchemy DB session"""
 
   def __init__(self, debug: bool):
     self.debug = debug
-    self.session = create_session(debug)
+    self.app = create_app()
+    # self.session = create_session(self.app, debug)
+
+  def maybe_get_or_create_notebook(self, identifier: str, create: bool):
+    """
+    Like ``get_or_create`` for a ``Notebook``, but it will only create the instance of ``create`` is
+    true (otherwise it throws a ``ValueError`` if the instance is not found in the DB).
+    """
+    with self.app.app_context():
+      if create:
+        return get_or_create(db.session, Notebook, identifier=identifier)
+      else:
+        nb = db.session.query(Notebook).filter_by(identifier=identifier).first()
+        if not nb:
+          raise ValueError(f"No such notebook: {identifier}")
+        return nb
 
 
 @click.group()
@@ -87,10 +90,11 @@ def attendance_open(ctx: Context, notebook: str, create: bool):
   """
   Open attendance for the notebook with identifier NOTEBOOK.
   """
-  nb = maybe_get_or_create_notebook(ctx.session, notebook, create)
-  nb.attendance_open = True
-  ctx.session.add(nb)
-  ctx.session.commit()
+  with ctx.app.app_context():
+    nb = ctx.maybe_get_or_create_notebook(notebook, create)
+    nb.attendance_open = True
+    db.session.add(nb)
+    db.session.commit()
 
 
 @attendance.command("close")
@@ -101,10 +105,11 @@ def attendance_close(ctx: Context, notebook: str, create: bool):
   """
   Close attendance for the notebook with identifier NOTEBOOK.
   """
-  nb = maybe_get_or_create_notebook(ctx.session, notebook, create)
-  nb.attendance_open = False
-  ctx.session.add(nb)
-  ctx.session.commit()
+  with ctx.app.app_context():
+    nb = ctx.maybe_get_or_create_notebook(notebook, create)
+    nb.attendance_open = False
+    db.session.add(nb)
+    db.session.commit()
 
 
 @cli.group("clear")
@@ -127,9 +132,10 @@ def clear_all(ctx: Context, force: bool):
       click.echo("clear all aborted")
       return
 
-  ctx.session.query(Response).delete()
-  ctx.session.query(AttendanceSubmission).delete()
-  ctx.session.commit()
+  with ctx.app.app_context():
+    db.session.query(Response).delete()
+    db.session.query(AttendanceSubmission).delete()
+    db.session.commit()
 
 
 @clear.command("user")
@@ -145,13 +151,14 @@ def clear_all(ctx: Context, username: str, force: bool):
       click.echo("clear user aborted")
       return
 
-  u = ctx.session.query(User).filter_by(username=username).first()
-  if not u:
-    raise ValueError(f"No such user: {username}")
+  with ctx.app.app_context():
+    u = db.session.query(User).filter_by(username=username).first()
+    if not u:
+      raise ValueError(f"No such user: {username}")
 
-  ctx.session.query(Response).filter_by(user=u).delete()
-  ctx.session.query(AttendanceSubmission).filter_by(user=u).delete()
-  ctx.session.commit()
+    db.session.query(Response).filter_by(user=u).delete()
+    db.session.query(AttendanceSubmission).filter_by(user=u).delete()
+    db.session.commit()
 
 
 @clear.command("notebook")
@@ -167,11 +174,11 @@ def clear_all(ctx: Context, notebook: str, force: bool):
       click.echo("clear notebook aborted")
       return
 
-  nb = maybe_get_or_create_notebook(ctx.session, notebook, False)
-
-  ctx.session.query(Response).filter_by(notebook=nb).delete()
-  ctx.session.query(AttendanceSubmission).filter_by(notebook=nb).delete()
-  ctx.session.commit()
+  with ctx.app.app_context():
+    nb = ctx.maybe_get_or_create_notebook(notebook, False)
+    db.session.query(Response).filter_by(notebook=nb).delete()
+    db.session.query(AttendanceSubmission).filter_by(notebook=nb).delete()
+    db.session.commit()
 
 
 @cli.group("reports")
@@ -190,7 +197,9 @@ def reports_users(ctx: Context, dest: IO):
   Generate a CSV report of all users in the database and write it to DEST (or stdout if DEST is
   unsepcified).
   """
-  users = ctx.session.query(User).order_by(User.username).all()
+  with ctx.app.app_context():
+    users = db.session.query(User).order_by(User.username).all()
+
   csv = to_csv([User.header_row(), *(u.to_row() for u in users)])
   dest.write(csv)
 
@@ -203,7 +212,9 @@ def reports_notebooks(ctx: Context, dest: IO):
   Generate a CSV report of all notebooks in the database and write it to DEST (or stdout if DEST is
   unsepcified).
   """
-  nbs = ctx.session.query(Notebook).order_by(Notebook.identifier).all()
+  with ctx.app.app_context():
+    nbs = db.session.query(Notebook).order_by(Notebook.identifier).all()
+
   csv = to_csv([Notebook.header_row(), *(nb.to_row() for nb in nbs)])
   dest.write(csv)
 
@@ -217,8 +228,10 @@ def reports_responses(ctx: Context, notebook: str, dest: IO):
   Generate a CSV report of all responses to notebook with identifier NOTEBOOK and write it to
   DEST (or stdout if DEST is unsepcified).
   """
-  nb = maybe_get_or_create_notebook(ctx.session, notebook, False)
-  rows, err = export_responses(ctx.session, nb, [], usernames=True)
+  with ctx.app.app_context():
+    nb = ctx.maybe_get_or_create_notebook(notebook, False)
+    rows, err = export_responses(db.session, nb, [], usernames=True)
+
   if err:
     raise ValueError(err)
 
@@ -234,8 +247,10 @@ def attendance_report(ctx: Context, notebook: str, dest: IO):
   Generate a CSV report of attendance submissions for notebook identifier NOTEBOOK and write it to
   DEST (or stdout if DEST is unsepcified).
   """
-  nb = maybe_get_or_create_notebook(ctx.session, notebook, False)
-  subms = ctx.session.query(AttendanceSubmission).filter_by(notebook=nb).all()
+  with ctx.app.app_context():
+    nb = ctx.maybe_get_or_create_notebook(notebook, False)
+    subms = db.session.query(AttendanceSubmission).filter_by(notebook=nb).all()
+
   csv = to_csv([AttendanceSubmission.header_row(), *(s.to_row() for s in subms)])
   dest.write(csv)
 
@@ -259,15 +274,17 @@ def seed(ctx: Context, file: IO):
   if rows[0] != ["username", "password"]:
     raise ValueError("CSV file does not contain expected headers")
 
-  for i, r in enumerate(rows[1:]):
-    if len(r) != 2:
-      raise ValueError(f"Row {i + 2} does not have 2 columns")
+  with ctx.app.app_context():
+    for i, r in enumerate(rows[1:]):
+      if len(r) != 2:
+        raise ValueError(f"Row {i + 2} does not have 2 columns")
 
-    u = User(username=r[0])
-    u.set_password(r[1])
-    ctx.session.add(u)
+      u = User(username=r[0])
+      u.set_password(r[1])
+      db.session.add(u)
 
-  ctx.session.commit()
+    db.session.commit()
+
   click.echo(f"Successfully import {len(rows) - 1} users")
 
 

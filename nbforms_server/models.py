@@ -30,8 +30,6 @@ ph = PasswordHasher()
 Session = sessionmaker()
 T = TypeVar("T")
 
-# TODO: some methods are missing docstrings header_row, to_row
-
 
 class User(db.Model):
   """
@@ -42,7 +40,7 @@ class User(db.Model):
   id: Mapped[int] = mapped_column(Sequence("user_id_seq"), primary_key=True)
   """the primary key of the table"""
 
-  username: Mapped[str] = mapped_column()
+  username: Mapped[str] = mapped_column(unique=True)
   """the user's username"""
 
   password_hash: Mapped[str] = mapped_column()
@@ -50,6 +48,9 @@ class User(db.Model):
 
   api_key: Mapped[Optional[str]] = mapped_column(unique=True)
   """the user's most recent API key"""
+
+  no_auth: Mapped[Optional[bool]] = mapped_column()
+  """whether this user was created with no auth (meaning it can't be logged into again)"""
 
   responses: Mapped[List["Response"]] = relationship(back_populates="user", cascade="all, delete-orphan")
   """all responses the user has submitted"""
@@ -59,7 +60,14 @@ class User(db.Model):
 
   def __repr__(self):
     return f"<User(username={self.username})>"
-  
+
+  @classmethod
+  def from_no_auth(cls) -> "User":
+    """
+    Create a user with a randomly-generated username for no-auth server instances.
+    """
+    return User(username=f"noauth_{random.randbytes(8).hex()}", password_hash="", no_auth=True)
+
   @classmethod
   def with_credentials(cls, username: str, password: str) -> "User":
     """
@@ -71,15 +79,23 @@ class User(db.Model):
   
   @staticmethod
   def header_row() -> List[str]:
+    """
+    Create a list representing the column headers for the rows returned by ``self.to_row()``.
+    """
     return [
       "id",
       "username",
+      "no_auth",
     ]
 
   def to_row(self) -> List:
+    """
+    Convert this model into a list of its attributes, suitable for rendering into a CSV.
+    """
     return [
       self.id,
       self.username,
+      self.no_auth or False,
     ]
 
   def hash_username(self):
@@ -127,7 +143,7 @@ class Notebook(db.Model):
   id: Mapped[int] = mapped_column(Sequence("notebook_id_seq"), primary_key=True)
   """the primary key of the table"""
 
-  identifier: Mapped[str] = mapped_column(unique=True, nullable=False)
+  identifier: Mapped[str] = mapped_column(unique=True)
   """a unique name for the notebook"""
 
   attendance_open: Mapped[Optional[bool]] = mapped_column()
@@ -144,6 +160,9 @@ class Notebook(db.Model):
   
   @staticmethod
   def header_row() -> List[str]:
+    """
+    Create a list representing the column headers for the rows returned by ``self.to_row()``.
+    """
     return [
       "id",
       "identifier",
@@ -151,6 +170,9 @@ class Notebook(db.Model):
     ]
 
   def to_row(self) -> List:
+    """
+    Convert this model into a list of its attributes, suitable for rendering into a CSV.
+    """
     return [
       self.id,
       self.identifier,
@@ -173,13 +195,13 @@ class Response(db.Model):
   notebook_id: Mapped[int] = mapped_column(ForeignKey("notebooks.id"))
   """the ID of the notebook this response belongs to"""
 
-  question_identifier: Mapped[str] = mapped_column(nullable=False)
+  question_identifier: Mapped[str] = mapped_column()
   """the identifier of the question this response is for"""
 
   response: Mapped[str] = mapped_column()
   """the user's response"""
 
-  timestamp: Mapped[dt.datetime] = mapped_column(nullable=False)
+  timestamp: Mapped[dt.datetime] = mapped_column()
   """the timestamp at which this response was written"""
 
   user: Mapped[User] = relationship(back_populates="responses")
@@ -204,10 +226,10 @@ class AttendanceSubmission(db.Model):
   notebook_id: Mapped[int] = mapped_column(ForeignKey("notebooks.id"))
   """the ID of the notebook this submission belongs to"""
 
-  timestamp: Mapped[dt.datetime] = mapped_column(nullable=False)
+  timestamp: Mapped[dt.datetime] = mapped_column()
   """the timestamp at which this submission was received"""
 
-  was_open: Mapped[bool] = mapped_column(nullable=False)
+  was_open: Mapped[bool] = mapped_column()
   """whether the notebook's attendance was open when this submission was received"""
 
   user: Mapped[User] = relationship(back_populates="attendance_submissions")
@@ -218,6 +240,9 @@ class AttendanceSubmission(db.Model):
 
   @staticmethod
   def header_row() -> List[str]:
+    """
+    Create a list representing the column headers for the rows returned by ``self.to_row()``.
+    """
     return [
       "id",
       "user id",
@@ -228,6 +253,9 @@ class AttendanceSubmission(db.Model):
     ]
 
   def to_row(self) -> List:
+    """
+    Convert this model into a list of its attributes, suitable for rendering into a CSV.
+    """
     return [
       self.id,
       self.user_id,
