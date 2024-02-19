@@ -38,16 +38,6 @@ def patch_cli_create_app(app):
     yield
 
 
-@pytest.fixture(autouse=True)
-def patch_cli_get_db_path():
-  """
-  A fixture that patches ``nbforms_server.__main__.get_db_path`` so that an in-memory db is used.
-  """
-  with mock.patch("nbforms_server.__main__.get_db_path") as mocked_get_db_path:
-    mocked_get_db_path.return_value = ":memory:"
-    yield
-
-
 @pytest.fixture
 def client(app):
   """

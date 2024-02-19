@@ -3,3 +3,4 @@ sqlalchemy
 Flask-SQLAlchemy
 argon2-cffi
 click
+gunicorn

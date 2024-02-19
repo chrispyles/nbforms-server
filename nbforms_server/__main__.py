@@ -5,7 +5,7 @@ import csv
 import sys
 
 from sqlalchemy import create_engine, select
-from typing import IO, List, TYPE_CHECKING
+from typing import IO, TYPE_CHECKING
 
 from . import create_app
 from .models import (
@@ -15,23 +15,13 @@ from .models import (
   get_or_create,
   Notebook,
   Response,
-  Session,
   User,
 )
-from .utils import get_db_path, to_csv
+from .utils import to_csv
 
 if TYPE_CHECKING:
   from flask import Flask
   from sqlalchemy.orm import Session as SessionType
-
-
-# def create_session(app: "Flask", debug: bool = False):
-#   """
-#   Create a sqlalchemy session.
-#   """
-#   engine = create_engine(f"sqlite:///{get_db_path(app)}", echo = debug)
-#   Session.configure(bind=engine)
-#   return Session()
 
 
 class Context:
@@ -50,7 +40,6 @@ class Context:
   def __init__(self, debug: bool):
     self.debug = debug
     self.app = create_app()
-    # self.session = create_session(self.app, debug)
 
   def maybe_get_or_create_notebook(self, identifier: str, create: bool):
     """
