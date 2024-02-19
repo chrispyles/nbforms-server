@@ -268,8 +268,7 @@ def seed(ctx: Context, file: IO):
       if len(r) != 2:
         raise ValueError(f"Row {i + 2} does not have 2 columns")
 
-      u = User(username=r[0])
-      u.set_password(r[1])
+      u = User.with_credentials(*r)
       db.session.add(u)
 
     db.session.commit()
